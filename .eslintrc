@@ -1,0 +1,16 @@
+{
+  "extends": ["airbnb-base", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 9,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "rules": {
+    "metrics/metrics-documentation": 0,
+    "no-use-before-define": "off"
+  },
+  "env": {
+    "node": true
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "elon_hood",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "private": true,
+  "scripts": {
+    "start": "node index",
+    "test": "eslint . && npm run coverage",
+    "eslint": "eslint .",
+    "lint": "npm run prettier && npm run eslint",
+    "prettier": "prettier -l '{src,test,docs}/**/*.{js,yml,yaml,json,md}'",
+    "prettier:write": "prettier --write '{src,test,docs}/**/*.{js,yml,yaml,json,md}'",
+    "mocha": "mocha --recursive",
+    "coverage": "istanbul cover _mocha --include-all-sources -x \"**/test/**\" -- --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bfoura/elon-hood.git"
+  },
+  "author": "Brahim FOURA",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "chai": "4.2.0",
+    "eslint": "7.2.0",
+    "eslint-config-airbnb-base": "14.2.0",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-import": "2.22.0",
+    "istanbul": "1.1.0-alpha.1",
+    "mocha": "8.2.1",
+    "prettier": "2.2.1",
+    "sinon": "^9.2.1",
+    "supertest": "4.0.2"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "assert": "^2.0.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "moment": "2.19.1",
+    "needle": "^2.6.0",
+    "superagent": "1.8.5",
+    "superagent-promise": "1.1.0",
+    "twitter-webhooks": "^0.3.3",
+    "winston": "^3.3.3"
+  },
+  "engines": {
+    "node": "14.8.0"
+  },
+  "type": "commonjs"
+}
