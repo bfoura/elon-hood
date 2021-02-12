@@ -23,16 +23,29 @@ async function insertRules() {
 
     // Delete all rules. Comment the line below if you want to keep your existing rules.
     await twitter.deleteAllRules(currentRules);
-
+    let rules = [];
     // Add rules to the stream. Comment the line below if you don't want to add new rules.
-    const rules = [
-      {
-        value: `(${config.twitter.terms.trim().split(',').join(' OR')}) from:${
-          config.twitter.username_to_watch
-        }`,
-        tag: 'elon dogecoin tweets',
-      },
-    ];
+
+    if (config.twitter.useCustomRule) {
+      rules = [
+        {
+          value: `${config.twitter.useCustomRule}`,
+          tag: `${config.twitter.customRuleTag}`,
+        },
+      ];
+    } else {
+      rules = [
+        {
+          value: `(${config.twitter.terms
+            .trim()
+            .split(',')
+            .join(' OR')}) from:${
+            config.twitter.username_to_watch
+          } -is:retweet`,
+          tag: 'elon dogecoin tweets',
+        },
+      ];
+    }
     await twitter.setRules(rules);
   } catch (e) {
     logger.error({ error: e }, 'An error occured while inserting stream');

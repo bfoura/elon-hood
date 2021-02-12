@@ -7,14 +7,17 @@ const { logger } = require('./logger');
 
 /**
  * Creates a usdt futures long order with a traling stop
- * @param {*} quantity
+ * @param {*} quantity order quantity
+ * @param {*} rate trailing stop callback rate
+ * @param {*} activationPrice price at which stop order is placed
  */
-async function longTralingStop(quantity, rate = undefined) {
+async function longTralingStop(quantity, rate = null, activationPrice = null) {
   const symbol = 'DOGEUSDT';
   const side = 'BUY';
   const type = 'TRAILING_STOP_MARKET';
   const reduceOnly = true;
   const callbackRate = rate || 0.1;
+  const price = activationPrice;
   const workingType = 'CONTRACT_PRICE';
   const timestamp = moment().utc().valueOf();
   const queryString = toQueryString({
@@ -22,6 +25,7 @@ async function longTralingStop(quantity, rate = undefined) {
     side,
     type,
     quantity,
+    price,
     reduceOnly,
     callbackRate,
     workingType,
@@ -42,6 +46,74 @@ async function longTralingStop(quantity, rate = undefined) {
   } catch (err) {
     logger.error({ err, queryString }, 'An error occured while creating trade');
     throw new Error(`An error occured while creating trade : ${err}'`);
+  }
+}
+
+/**
+ * Creates a usdt futures long order with a traling stop
+ * @param {*} quantity order quantity
+ * @param {*} price order price
+ */
+async function longMarket(quantity, symbol, reduceOnly = false) {
+  const side = 'BUY';
+  const type = 'MARKET';
+  const workingType = 'CONTRACT_PRICE';
+  const timestamp = moment().utc().valueOf();
+  const queryString = toQueryString({
+    symbol,
+    side,
+    type,
+    quantity,
+    reduceOnly,
+    workingType,
+    timestamp,
+    recvWindow: 10000000,
+  });
+  const signature = generateSignature(queryString, config.binance.api_secret);
+
+  const url = `${config.binance.base_url}/fapi/v1/order?${queryString}&signature=${signature}`;
+
+  try {
+    const { body } = await agent
+      .post(url)
+      .set('Content-Type', `application/json`)
+      .set('X-MBX-APIKEY', config.binance.api_key);
+
+    return body;
+  } catch (err) {
+    logger.error({ err, queryString }, 'An error occured while creating trade');
+    throw new Error(`An error occured while creating trade : ${err}'`);
+  }
+}
+
+/**
+ * Returns Futures account balance
+ */
+async function futuresAccountBalance() {
+  const timestamp = moment().utc().valueOf();
+  const queryString = toQueryString({
+    timestamp,
+    recvWindow: 10000000,
+  });
+  const signature = generateSignature(queryString, config.binance.api_secret);
+
+  const url = `${config.binance.base_url}/fapi/v1/balance?${queryString}&signature=${signature}`;
+
+  try {
+    const { body } = await agent
+      .post(url)
+      .set('Content-Type', `application/json`)
+      .set('X-MBX-APIKEY', config.binance.api_key);
+
+    return body;
+  } catch (err) {
+    logger.error(
+      { err, queryString },
+      'An error occured while retrieving futures account balance',
+    );
+    throw new Error(
+      `An error occured while retrieving futures account balance : ${err}'`,
+    );
   }
 }
 
@@ -68,4 +140,6 @@ function toQueryString(params) {
 
 module.exports = {
   longTralingStop,
+  longMarket,
+  futuresAccountBalance,
 };

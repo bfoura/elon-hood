@@ -58,6 +58,7 @@ async function hook(app) {
         const result = await binance.longTralingStop(
           config.binance.order.quantity_to_by,
           config.binance.order.callback_rate,
+          config.binance.order.activation_price,
         );
         logger.info(
           { result },
@@ -182,16 +183,16 @@ function streamConnect() {
   stream
     .on('data', async (data) => {
       try {
-        const json = JSON.parse(data);
-        console.log(json);
-        logger.info({ data }, '[on_stream] Received stream data');
-        const result = await binance.longTralingStop(
+        if (isKeepAliveSignal(data)) return;
+        const json = validateEvent(data);
+        logger.info({ json }, '[on_stream] Received valid tweets stream data');
+        const result = await binance.longMarket(
           config.binance.order.quantity_to_by,
-          config.binance.order.callback_rate,
+          config.binance.order.symbol,
         );
         logger.info({ result }, '[on_stream] Placed order successfully');
-      } catch (e) {
-        // Keep alive signal received. Do nothing.
+      } catch (error) {
+        logger.info({ data, error }, 'An error occured when validating data');
       }
     })
     .on('error', (error) => {
@@ -201,6 +202,27 @@ function streamConnect() {
     });
 
   return stream;
+}
+
+/**
+ * Checks wether it is a keep-alive signal
+ * to treat it or not
+ * @param {*} data keep-alive data
+ */
+function isKeepAliveSignal(data) {
+  const hearBeat = Buffer.from([13, 10]);
+  // Keep alive signal received. Do nothing.
+  if (data.equals(hearBeat)) return true;
+  return false;
+}
+
+function validateEvent(data) {
+  const json = JSON.parse(data);
+  logger.info({ json }, 'Parsed event json :');
+  if (!json.data.id || !json.data.text || json.matching_rules.lengh < 1) {
+    throw new Error('Event data are Invalid');
+  }
+  return json;
 }
 
 module.exports = {
