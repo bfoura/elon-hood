@@ -20,9 +20,16 @@ async function insertRules() {
   try {
     // Gets the complete list of rules currently applied to the stream
     currentRules = await twitter.getAllRules();
+    logger.info('[lib.bot.insertRules] successfully retrieved rules', {
+      currentRules,
+    });
 
     // Delete all rules. Comment the line below if you want to keep your existing rules.
-    await twitter.deleteAllRules(currentRules);
+    const deletedRules = await twitter.deleteAllRules(currentRules);
+    logger.info('[lib.bot.insertRules] successfully deleted all rules', {
+      deletedRules,
+    });
+
     let rules = [];
     // Add rules to the stream. Comment the line below if you don't want to add new rules.
 
@@ -46,7 +53,10 @@ async function insertRules() {
         },
       ];
     }
-    await twitter.setRules(rules);
+    const setRules = await twitter.setRules(rules);
+    logger.info('[lib.bot.insertRules] successfully set  rules', {
+      setRules,
+    });
   } catch (e) {
     logger.error({ error: e }, 'An error occured while inserting stream');
     throw e;

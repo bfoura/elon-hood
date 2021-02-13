@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  Elon hood template file
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 300
+    Environment:
+      Variables:
+        LOG_LEVEL: info
+        TWITTER_TOKEN: !Ref TwitterToken
+        TWITTER_SECRET: !Ref TwitterSecret
+        TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
+        TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
+        TWITTER_BEARER_TOKEN: !Ref TwitterBearerToken
+        TWITTER_ENVIRONMENT: !Ref TwitterEnvironment
+        TWITTER_USERNAME_TO_WATCH: !Ref TwitterUsernameToWatch
+        TWITTER_FILTER_TERMS: !Ref TwitterFilterTerms
+        CUSTOM_RULE: !Ref CustomRule
+        CUSTOM_RULE_TAG: !Ref CustomRuleTag
+        BINANCE_API_KEY: !Ref BinanceApiKey
+        BINANCE_API_SECRET: !Ref BinanceApiSecret
+        ORDER_QUANTITY_TO_BUY: !Ref OrderQuantityToBuy
+        ORDER_CALLBACK_RATE: !Ref OrderCallbackRate
+        ORDER_PRICE: !Ref OrderPrice
+        ORDER_SYMBOL: !Ref OrderSymbol
+        SERVER_URL_DOMAIN: !Ref ServerUrlDomain
+        SERVER_ROUTE_URL: !Ref ServerRouteUrl
+        PORT: !Ref Port
+
+Parameters:
+  Env:
+    Type: String
+  TwitterToken:
+    Type: String
+  TwitterSecret:
+    Type: String
+  TwitterConsumerKey:
+    Type: String
+  TwitterConsumerSecret:
+    Type: String
+  TwitterBearerToken:
+    Type: String
+  TwitterEnvironment:
+    Type: String
+  TwitterUsernameToWatch:
+    Type: String
+  TwitterFilterTerms:
+    Type: String
+  CustomRule:
+    Type: String
+  CustomRuleTag:
+    Type: String
+  BinanceApiKey:
+    Type: String
+  BinanceApiSecret:
+    Type: String
+  OrderQuantityToBuy:
+    Type: Number
+  OrderCallbackRate:
+    Type: Number
+  OrderPrice:
+    Type: Number
+  OrderSymbol:
+    Type: String
+  ServerUrlDomain:
+    Type: String
+  ServerRouteUrl:
+    Type: String
+  Port:
+    Type: String
+
+Resources:
+  AppLayer:
+    Type: AWS::Serverless::LayerVersion
+
+    Properties:
+      LayerName: !Sub '${Env}-elon-hood'
+      Description: App's dependencies
+      ContentUri: dependencies/
+      CompatibleRuntimes:
+        - nodejs12.x
+
+  PRBotFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+
+    Properties:
+      CodeUri: ./
+      Handler: src/lambda.handler
+      Runtime: nodejs12.x
+
+      Events:
+        CreateEvent:
+          Type: Api
+          Properties:
+            Method: post
+            Path: /api/messages
+
+      FunctionName: !Sub '${Env}-start'
+
+      Layers:
+        - !Ref AppLayer

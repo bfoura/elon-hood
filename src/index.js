@@ -77,7 +77,7 @@ async function start() {
   // logger.info('Database connected');
   // const queue = queueFactory.createQueue(db);
   // const locker = lockerFactory.createLocker(db);
-
+  logger.info('[start] starting stream');
   await bot.startStream();
   return true;
 }
@@ -89,10 +89,10 @@ async function start() {
  * @returns {Promise<void>} Nothing
  */
 async function stop(code, err) {
-  logger.info({ code }, 'Application stopping');
+  logger.info('Application stopping', { code });
 
   if (err) {
-    logger.error({ err, code }, 'Application error');
+    logger.error('Application error', { code });
   }
 
   // if (slackBot) {
@@ -111,7 +111,7 @@ async function stop(code, err) {
   // await db.sequelize.close();
   // logger.info('Connection to db closed');
 
-  logger.info({ code }, 'Application stopped');
+  logger.info('Application stopped', { code });
 }
 
 if (!module.parent) {

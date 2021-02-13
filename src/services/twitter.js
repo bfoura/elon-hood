@@ -45,25 +45,25 @@ async function hook(app) {
       if (event !== 'tweet_create') {
         return;
       }
-      logger.info(
-        { user_id: userId, data, terms: config.twitter.terms },
-        '[lib.twitter.onTweetCreated] Received tweed_create event',
-      );
+      logger.info('[lib.twitter.onTweetCreated] Received tweed_create event', {
+        user_id: userId,
+        data,
+        terms: config.twitter.terms,
+      });
       const valid = contains(data, config.twitter.terms);
       if (valid) {
         logger.info(
-          { user_id: userActivity.id, data, terms: config.twitter.terms },
           '[lib.twitter.onTweetCreated] tweet_create event is valid',
+          { user_id: userActivity.id, data, terms: config.twitter.terms },
         );
         const result = await binance.longTralingStop(
           config.binance.order.quantity_to_by,
           config.binance.order.callback_rate,
           config.binance.order.activation_price,
         );
-        logger.info(
-          { result },
-          '[lib.twitter.onTweetCreated] Placed order successfully',
-        );
+        logger.info('[lib.twitter.onTweetCreated] Placed order successfully', {
+          result,
+        });
       }
     });
   } catch (error) {
@@ -129,7 +129,6 @@ async function getAllRules() {
   if (response.statusCode !== 200) {
     throw new Error(response.body);
   }
-
   return response.body;
 }
 
@@ -162,7 +161,6 @@ async function deleteAllRules(rules) {
   if (response.statusCode !== 200) {
     throw new Error(response.body);
   }
-
   return response.body;
 }
 
@@ -179,23 +177,26 @@ function streamConnect() {
     },
     timeout: 20000,
   });
+  logger.info('[services.twitter.stream_connect] retrieved stream');
 
   stream
     .on('data', async (data) => {
       try {
         if (isKeepAliveSignal(data)) return;
         const json = validateEvent(data);
-        logger.info({ json }, '[on_stream] Received valid tweets stream data');
+        logger.info('[on_stream] Received valid tweets stream data', { json });
         const result = await binance.longMarket(
           config.binance.order.quantity_to_by,
           config.binance.order.symbol,
         );
-        logger.info({ result }, '[on_stream] Placed order successfully');
+        logger.info('[on_stream] Placed order successfully', { result });
       } catch (error) {
-        logger.info({ data, error }, 'An error occured when validating data');
+        logger.info('An error occured when validating data', { data, error });
       }
     })
     .on('error', (error) => {
+      logger.info('[on_stream_error] received error event');
+
       if (error.code === 'ETIMEDOUT') {
         stream.emit('timeout');
       }
@@ -212,13 +213,13 @@ function streamConnect() {
 function isKeepAliveSignal(data) {
   const hearBeat = Buffer.from([13, 10]);
   // Keep alive signal received. Do nothing.
-  if (data.equals(hearBeat)) return true;
+  if (data.equals && data.equals(hearBeat)) return true;
   return false;
 }
 
 function validateEvent(data) {
   const json = JSON.parse(data);
-  logger.info({ json }, 'Parsed event json :');
+  logger.info('Parsed event json :', { json });
   if (!json.data.id || !json.data.text || json.matching_rules.lengh < 1) {
     throw new Error('Event data are Invalid');
   }

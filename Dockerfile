@@ -1,12 +1,15 @@
-FROM node:14.8.0
+FROM node:12.15.0
 
 ARG BUILD_ENV=production
 
-EXPOSE 8000
+RUN mkdir -p /elon-hood
 
 WORKDIR /elon-hood/
 
-COPY .npmrc package.json package-lock.json ./
+EXPOSE 3000
+
+COPY package.json package-lock.json ./
+
 RUN npm install --$BUILD_ENV
 
 COPY . /elon-hood/

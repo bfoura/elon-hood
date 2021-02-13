@@ -12,7 +12,8 @@
     "prettier": "prettier -l '{src,test,docs}/**/*.{js,yml,yaml,json,md}'",
     "prettier:write": "prettier --write '{src,test,docs}/**/*.{js,yml,yaml,json,md}'",
     "mocha": "mocha --recursive",
-    "coverage": "istanbul cover _mocha --include-all-sources -x \"**/test/**\" -- --recursive"
+    "coverage": "istanbul cover _mocha --include-all-sources -x \"**/test/**\" -- --recursive",
+    "copy-dependencies": "mkdir -p ./dependencies/nodejs/ && cp package.json ./dependencies/nodejs && cd ./dependencies/nodejs && npm i --production"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@vendia/serverless-express": "^4.3.0",
     "assert": "^2.0.0",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
