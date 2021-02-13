@@ -27,6 +27,17 @@ function sigint() {
 
 /* istanbul ignore next */
 /**
+ * Prevent the process from stopping on sighup
+ *
+ * @returns {Promise<void>} Nothing
+ * @private
+ */
+function sighup() {
+  logger.info('Received SIGHUP. Ignoring.');
+}
+
+/* istanbul ignore next */
+/**
  * Stop the process on uncaughtException
  *
  * @param {Error} err Uncaught error
@@ -57,11 +68,13 @@ function unhandledRejection(err) {
 function bindProcess() {
   process.removeListener('SIGTERM', sigterm);
   process.removeListener('SIGINT', sigint);
+  process.removeListener('SIGHUP', sighup);
   process.removeListener('uncaughtException', uncaughtException);
   process.removeListener('unhandledRejection', unhandledRejection);
 
   process.once('SIGTERM', sigterm);
   process.once('SIGINT', sigint);
+  process.once('SIGHUP', sighup);
   process.once('uncaughtException', uncaughtException);
   process.once('unhandledRejection', unhandledRejection);
 }
